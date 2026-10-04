@@ -1,9 +1,6 @@
 import streamlit as st
 import time
 
-# ----------------------
-# AI Makeup Assistant
-# ----------------------
 st.set_page_config(
     page_title="💄 AI Makeup Assistant",
     page_icon="💄",
@@ -11,9 +8,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ----------------------
-# Session State
-# ----------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -243,9 +237,6 @@ TUTORIALS = {
     }
 }
 
-# ----------------------
-# Helper Function
-# ----------------------
 def get_tutorial(skin_type, occasion, level, undertone):
     base = TUTORIALS["base"][skin_type]
     eyes = TUTORIALS["eyes"][level]
@@ -254,12 +245,11 @@ def get_tutorial(skin_type, occasion, level, undertone):
     return base, eyes, lips, undertone_tip
 
 # ----------------------
-# Display UI
+# Main UI
 # ----------------------
 st.markdown("<h1>💄 AI Makeup Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Your personalized makeup guide — step by step ✨</p>", unsafe_allow_html=True)
 
-# --- Input Form ---
 with st.container():
     st.markdown("<div class='form-card'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
@@ -273,12 +263,10 @@ with st.container():
     generate_btn = st.button("✨ Generate My Tutorial")
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- Generate Tutorial ---
 if generate_btn:
     user_msg = f"**Selection:** {skin_type} skin • {occasion} • {level} • {face_shape} • {undertone}"
     st.markdown(f"<div class='user-bubble'>{user_msg}</div>", unsafe_allow_html=True)
 
-    # Skeleton loading
     skeleton_placeholder = st.empty()
     skeleton_html = """
     <div class='assistant-bubble'>
@@ -295,10 +283,8 @@ if generate_btn:
     skeleton_placeholder.markdown(skeleton_html, unsafe_allow_html=True)
     time.sleep(2.5)
 
-    # Get tutorial data
     base_steps, eye_steps, lip_steps, undertone_tip = get_tutorial(skin_type, occasion, level, undertone)
 
-    # Build tutorial HTML
     result_html = f"""
     <div class='assistant-bubble'>
         <div class='result-header'>
@@ -337,16 +323,14 @@ if generate_btn:
     </div>
     """
 
-    # ✅ THIS IS THE KEY — unsafe_allow_html=True shows styled cards, NOT raw code
+    # ✅ THIS IS THE CRITICAL LINE — unsafe_allow_html=True MUST BE HERE
     skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
 
-    # Save to history
     st.session_state.messages.append({"role": "user", "content": f"<div class='user-bubble'>{user_msg}</div>"})
     st.session_state.messages.append({"role": "assistant", "content": result_html})
 
-# --- Show Past Conversations ---
 else:
     if st.session_state.messages:
         for msg in st.session_state.messages:
-            # ✅ Also fixed here — history shows styled cards too
+            # ✅ Also required here for history to render properly
             st.markdown(msg["content"], unsafe_allow_html=True)
