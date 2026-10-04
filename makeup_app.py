@@ -323,7 +323,7 @@ if generate_btn:
     </div>
     """
 
-    # ✅ THIS IS THE CRITICAL LINE — unsafe_allow_html=True MUST BE HERE
+    # ✅ THIS IS THE KEY — unsafe_allow_html=True MUST BE HERE
     skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
 
     st.session_state.messages.append({"role": "user", "content": f"<div class='user-bubble'>{user_msg}</div>"})
