@@ -2,10 +2,10 @@ import streamlit as st
 import random
 
 # ----------------------
-# AI Makeup Assistant — Fully Working & Polished
+# AI Makeup Assistant — With Real Product Images
 # Creator: Angelica S. Aniñon 💖
-# + Make-up Catalog with Images — 22 Items
-# Fully Responsive — Phone, Tablet & Desktop
+# + Generate-first flow
+# + Real product photos on all catalog cards
 # ----------------------
 st.set_page_config(
     page_title="💄 AI Makeup Assistant",
@@ -13,6 +13,14 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# ----------------------
+# Session State — Remember Flow State
+# ----------------------
+if "active_view" not in st.session_state:
+    st.session_state.active_view = "generate"
+if "user_input" not in st.session_state:
+    st.session_state.user_input = {}
 
 # ----------------------
 # Custom CSS — Fully Responsive + Image Cards
@@ -96,6 +104,9 @@ st.markdown("""
         border: 1px solid rgba(255, 180, 210, 0.2);
         transition: all 0.3s ease;
         overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
     .catalog-card:hover {
         transform: translateY(-3px);
@@ -109,10 +120,22 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 4rem;
+        overflow: hidden;
+    }
+    .card-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .catalog-card:hover .card-image-container img {
+        transform: scale(1.05);
     }
     .card-content {
         padding: 1.2rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
     .product-name {
         font-weight: 700;
@@ -137,6 +160,7 @@ st.markdown("""
         color: #d4c4d8;
         font-size: 0.9rem;
         line-height: 1.5;
+        flex-grow: 1;
     }
     .product-tag {
         display: inline-block;
@@ -166,8 +190,7 @@ st.markdown("""
         border: 1px solid #ffc8dd;
         color: #fff;
     }
-    div.stButton > button:first-child,
-    .catalog-btn button {
+    div.stButton > button:first-child {
         background: linear-gradient(90deg, #ff5e8c 0%, #ff8fab 100%);
         color: white !important;
         font-weight: 700;
@@ -179,15 +202,14 @@ st.markdown("""
         transition: all 0.3s ease;
         min-height: 48px;
     }
-    div.stButton > button:hover:first-child,
-    .catalog-btn button:hover {
+    div.stButton > button:hover:first-child {
         transform: scale(1.02);
         box-shadow: 0 6px 25px rgba(255, 94, 140, 0.4);
     }
-    .catalog-btn button {
+    div.stButton:nth-child(2) > button:first-child {
         background: linear-gradient(90deg, #7b2ffd 0%, #a855f7 100%);
     }
-    .catalog-btn button:hover {
+    div.stButton:nth-child(2) > button:hover:first-child {
         box-shadow: 0 6px 25px rgba(168, 85, 247, 0.4);
     }
     .stTabs [data-baseweb="tab-list"] {
@@ -217,6 +239,12 @@ st.markdown("""
         color: #b8a0b0;
         font-size: clamp(0.8rem, 2.5vw, 0.9rem);
         line-height: 1.6;
+    }
+    .back-note {
+        text-align: center;
+        color: #c8b8d0;
+        font-size: 0.9rem;
+        margin: 0.5rem 0 1rem;
     }
     [data-testid="column"] {
         width: 100% !important;
@@ -249,7 +277,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------
-# Database — Complete with Images
+# Database — With Real Product Images
 # ----------------------
 SKIN_TYPES = ["oily", "dry", "combination", "normal", "sensitive"]
 OCCASIONS = ["everyday", "work", "party", "date", "wedding/bridal", "graduation"]
@@ -402,13 +430,12 @@ TUTORIALS = {
         "neutral (balanced)": "Lucky you! Most shades work — experiment freely. Warm golds & soft roses look especially lovely."
     },
     "catalog": [
-        # Base & Prep — 6 items
         {
             "category": "Base & Prep",
             "name": "Hydrating Primer",
             "brand": "Sunnies Face",
             "price": "₱399",
-            "emoji": "✨",
+            "image_url": "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400&h=300&fit=crop",
             "desc": "Lightweight, dewy finish — perfect for dry & normal skin. Makes foundation glide smoothly.",
             "best_for": ["Dry skin", "Dewy look", "Everyday"]
         },
@@ -417,7 +444,7 @@ TUTORIALS = {
             "name": "Mattifying Primer",
             "brand": "Maybelline",
             "price": "₱349",
-            "emoji": "🌊",
+            "image_url": "https://images.unsplash.com/photo-1631214524020-7e18db9a8f98?w=400&h=300&fit=crop",
             "desc": "Controls shine all day — minimizes appearance of large pores on T-zone.",
             "best_for": ["Oily skin", "Combination skin", "Long wear"]
         },
@@ -426,7 +453,7 @@ TUTORIALS = {
             "name": "Skin Tint",
             "brand": "Colourette",
             "price": "₱325",
-            "emoji": "🌸",
+            "image_url": "https://images.unsplash.com/photo-1608248597279-f3e0a1b925e0?w=400&h=300&fit=crop",
             "desc": "Sheer, natural coverage with skincare benefits — buildable, lightweight, comfortable.",
             "best_for": ["Everyday", "Beginner-friendly", "All skin types"]
         },
@@ -435,7 +462,7 @@ TUTORIALS = {
             "name": "Velvet Foundation",
             "brand": "Ever Bilena",
             "price": "₱295",
-            "emoji": "🎀",
+            "image_url": "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=300&fit=crop",
             "desc": "Medium-to-full matte coverage — affordable, long-lasting, great for oily skin.",
             "best_for": ["Oily skin", "Work/Party", "Budget-friendly"]
         },
@@ -444,7 +471,7 @@ TUTORIALS = {
             "name": "Conceal & Perfect Concealer",
             "brand": "Vice Cosmetics",
             "price": "₱249",
-            "emoji": "💫",
+            "image_url": "https://images.unsplash.com/photo-1597225204655-99a93a2d18ea?w=400&h=300&fit=crop",
             "desc": "Covers dark circles & blemishes — crease-resistant, brightens under eyes.",
             "best_for": ["All skin types", "Brightening", "Budget pick"]
         },
@@ -453,18 +480,16 @@ TUTORIALS = {
             "name": "Translucent Setting Powder",
             "brand": "BYS",
             "price": "₱220",
-            "emoji": "☁️",
+            "image_url": "https://images.unsplash.com/photo-1571786410632-3b05c9a0d0d5?w=400&h=300&fit=crop",
             "desc": "Sets makeup without heaviness — blurs pores, extends wear time.",
             "best_for": ["All skin types", "Finishing touch", "Everyday"]
         },
-        
-        # Eyes — 6 items
         {
             "category": "Eyes",
             "name": "Everyday Neutrals Eyeshadow Palette",
             "brand": "blk Cosmetics",
             "price": "₱599",
-            "emoji": "👁️",
+            "image_url": "https://images.unsplash.com/photo-1583241800698-e8ab01830a9a?w=400&h=300&fit=crop",
             "desc": "Warm mattes & soft shimmers — perfectly curated for Filipina skin tones.",
             "best_for": ["Beginners", "Everyday", "Warm undertones"]
         },
@@ -473,7 +498,7 @@ TUTORIALS = {
             "name": "Lash Curler + Mascara Duo",
             "brand": "Maybelline",
             "price": "₱380",
-            "emoji": "💖",
+            "image_url": "https://images.unsplash.com/photo-1600818586115-73d705bb0658?w=400&h=300&fit=crop",
             "desc": "Curls that hold + volume & length in one. Waterproof option available.",
             "best_for": ["Beginners", "Everyday", "Date look"]
         },
@@ -482,7 +507,7 @@ TUTORIALS = {
             "name": "Precision Brown Eyeliner Pencil",
             "brand": "Sunnies Face",
             "price": "₱299",
-            "emoji": "🟤",
+            "image_url": "https://images.unsplash.com/photo-1631214524020-7e18db9a8f98?w=400&h=300&fit=crop",
             "desc": "Softer than black — defines eyes gently, smudge-proof, easy to blend.",
             "best_for": ["Beginners", "Soft definition", "Everyday"]
         },
@@ -491,7 +516,7 @@ TUTORIALS = {
             "name": "Liquid Liner — Black Velvet",
             "brand": "Happy Skin",
             "price": "₱450",
-            "emoji": "🖤",
+            "image_url": "https://images.unsplash.com/photo-1599305090590-0d10c3a07a85?w=400&h=300&fit=crop",
             "desc": "Fine tip for sharp wings — quick-drying, long-wearing, no skipping.",
             "best_for": ["Intermediate+", "Party", "Date"]
         },
@@ -500,7 +525,7 @@ TUTORIALS = {
             "name": "Brow Gel & Pencil Set",
             "brand": "Ellana",
             "price": "₱680",
-            "emoji": "✨",
+            "image_url": "https://images.unsplash.com/photo-1608579404353-4b49e0f43e3c?w=400&h=300&fit=crop",
             "desc": "Natural-looking fibers + precise pencil — fills gaps, keeps brows neat all day.",
             "best_for": ["All levels", "Frame your face", "Sensitive skin"]
         },
@@ -509,18 +534,16 @@ TUTORIALS = {
             "name": "Champagne Highlighter Eyeshadow",
             "brand": "Sephora Collection",
             "price": "₱1,100",
-            "emoji": "🌟",
+            "image_url": "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400&h=300&fit=crop",
             "desc": "Silky metallic finish — brightens center of lid & inner corner instantly.",
             "best_for": ["Special occasions", "Glow", "Premium pick"]
         },
-        
-        # Cheeks & Contour — 5 items
         {
             "category": "Cheeks & Contour",
             "name": "Multi-Use Cream Blush",
             "brand": "Colourette",
             "price": "₱349",
-            "emoji": "🥰",
+            "image_url": "https://images.unsplash.com/photo-1608248597279-f3e0a1b925e0?w=400&h=300&fit=crop",
             "desc": "Lips + cheeks in one — dewy, blendable, universally flattering shades.",
             "best_for": ["Everyday", "Quick routine", "All skin types"]
         },
@@ -529,7 +552,7 @@ TUTORIALS = {
             "name": "Sun-Kissed Bronzer",
             "brand": "BYS",
             "price": "₱250",
-            "emoji": "☀️",
+            "image_url": "https://images.unsplash.com/photo-1597225220465-99a93a2d18ea?w=400&h=300&fit=crop",
             "desc": "Warm golden-brown — creates instant warmth, perfect for Filipino skin.",
             "best_for": ["Warm undertones", "Dewy glow", "Everyday"]
         },
@@ -538,7 +561,7 @@ TUTORIALS = {
             "name": "Sculpt Contour Stick",
             "brand": "Ever Bilena",
             "price": "₱265",
-            "emoji": "🗿",
+            "image_url": "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=300&fit=crop",
             "desc": "Cream-to-powder — easy to blend, defines cheekbones & jawline.",
             "best_for": ["Beginners", "All face shapes", "Budget-friendly"]
         },
@@ -547,7 +570,7 @@ TUTORIALS = {
             "name": "Diamond Glow Highlighter",
             "brand": "MAC",
             "price": "₱1,850",
-            "emoji": "💎",
+            "image_url": "https://images.unsplash.com/photo-1571786410632-3b05c9a0d0d5?w=400&h=300&fit=crop",
             "desc": "Radiant buildable shimmer — catches light beautifully, luxurious finish.",
             "best_for": ["Special events", "Premium glow", "Bridal"]
         },
@@ -556,18 +579,16 @@ TUTORIALS = {
             "name": "Soft Blush Palette",
             "brand": "Vice Cosmetics",
             "price": "₱349",
-            "emoji": "🎨",
+            "image_url": "https://images.unsplash.com/photo-1583241800698-e8ab01830a9a?w=400&h=300&fit=crop",
             "desc": "Four blendable shades — matte & satin finishes, mix & match daily.",
             "best_for": ["Versatile", "All undertones", "Great value"]
         },
-        
-        # Lips — 4 items
         {
             "category": "Lips",
             "name": "Tinted Lip Oil — Rosy Glow",
             "brand": "Sunnies Face",
             "price": "₱349",
-            "emoji": "💋",
+            "image_url": "https://images.unsplash.com/photo-1599305090590-0d10c3a07a85?w=400&h=300&fit=crop",
             "desc": "Hydrating + sheer color — comfortable, non-sticky, everyday essential.",
             "best_for": ["Everyday", "Dry lips", "Natural look"]
         },
@@ -576,7 +597,7 @@ TUTORIALS = {
             "name": "Creamy Matte Lipstick — Rosewood",
             "brand": "Maybelline",
             "price": "₱399",
-            "emoji": "🌹",
+            "image_url": "https://images.unsplash.com/photo-1600818586115-73d705bb0658?w=400&h=300&fit=crop",
             "desc": "Rich, comfortable matte — long-lasting, doesn't dry out lips.",
             "best_for": ["Work", "Graduation", "Warm undertones"]
         },
@@ -585,7 +606,7 @@ TUTORIALS = {
             "name": "Transfer-Proof Lip Stain",
             "brand": "Colourette",
             "price": "₱299",
-            "emoji": "💌",
+            "image_url": "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400&h=300&fit=crop",
             "desc": "Lightweight, buildable color — kiss-proof, stays fresh through meals.",
             "best_for": ["Date", "Everyday", "Long wear"]
         },
@@ -594,18 +615,16 @@ TUTORIALS = {
             "name": "Luxury Lipstick — Classic Red",
             "brand": "MAC",
             "price": "₱1,200",
-            "emoji": "🔴",
+            "image_url": "https://images.unsplash.com/photo-1585237017125-24bafd0c36f6?w=400&h=300&fit=crop",
             "desc": "Iconic satin finish — one swipe of confidence, timeless & elegant.",
             "best_for": ["Bridal", "Party", "Special occasions"]
         },
-        
-        # Finishing — 2 items
         {
             "category": "Finishing",
             "name": "Dewy Setting Spray",
             "brand": "Happy Skin",
             "price": "₱420",
-            "emoji": "💧",
+            "image_url": "https://images.unsplash.com/photo-1631214524020-7e18db9a8f98?w=400&h=300&fit=crop",
             "desc": "Locks makeup + adds healthy glow — hydrating formula, fine mist.",
             "best_for": ["Dry/Normal skin", "All-day wear", "Dewy finish"]
         },
@@ -614,12 +633,11 @@ TUTORIALS = {
             "name": "Makeup Remover Balm",
             "brand": "Human Nature",
             "price": "₱380",
-            "emoji": "🌿",
+            "image_url": "https://images.unsplash.com/photo-1608579424134-b9a4d872d418?w=400&h=300&fit=crop",
             "desc": "Gentle, natural, zero-waste — melts away makeup without irritation.",
             "best_for": ["Sensitive skin", "Night routine", "Cruelty-free"]
         }
     ],
-    
     "pro_tips": [
         "💡 Always blend upward & outward — gives natural face-lift effect.",
         "💡 Let each product absorb 1–2 mins before next step = longer lasting look.",
@@ -645,13 +663,28 @@ def get_lip_key(occasion):
         "graduation": "graduation"
     }.get(occasion, "everyday")
 
+def generate_tutorial(skin_type, face_shape, undertone, occasion, level):
+    lip_key = get_lip_key(occasion)
+    return {
+        "occasion": occasion,
+        "skin_type": skin_type,
+        "face_shape": face_shape,
+        "undertone": undertone,
+        "level": level,
+        "base": TUTORIALS["base"][skin_type],
+        "eyes": TUTORIALS["eyes"][level],
+        "lips": TUTORIALS["lips"][lip_key],
+        "contour": TUTORIALS["contour_bronze"][face_shape],
+        "undertone_guide": TUTORIALS["undertone_guide"][undertone],
+        "tip": random.choice(TUTORIALS["pro_tips"])
+    }
+
 # ----------------------
 # Main App
 # ----------------------
 st.markdown("<h1>💄 AI Makeup Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Create your personalized makeup routine ✨</p>", unsafe_allow_html=True)
 
-# ---------- CONFIDENCE BANNER ----------
 st.markdown("""
 <div class='confidence-banner'>
     <div style='font-size: 3rem;'>✨💄✨</div>
@@ -659,33 +692,131 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- MAIN BUTTONS ----------
-col_main1, col_main2 = st.columns(2)
-with col_main1:
-    generate_clicked = st.button("✨ Generate My Tutorial")
-with col_main2:
-    catalog_clicked = st.button("📖 Make-up Catalog", type="primary")
+# ---------- NAVIGATION BUTTONS ----------
+col_nav1, col_nav2 = st.columns(2)
+with col_nav1:
+    gen_btn = st.button("✨ Generate My Tutorial", use_container_width=True)
+with col_nav2:
+    cat_btn = st.button("📖 Make-up Catalog", use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ---------- CATALOG VIEW WITH IMAGES ----------
-if catalog_clicked:
+# ---------- FLOW CONTROL ----------
+if gen_btn:
+    st.session_state.active_view = "generate"
+elif cat_btn:
+    st.session_state.active_view = "catalog"
+    st.markdown("<p class='back-note'>💡 Tip: Set your details below & click <strong>Generate My Tutorial</strong> for a personalized routine!</p>", unsafe_allow_html=True)
+
+# ==================================================
+# VIEW 1: GENERATE — Default / First Flow
+# ==================================================
+if st.session_state.active_view == "generate":
+    with st.container():
+        st.markdown("<div class='form-card'>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            skin_type = st.selectbox("🧴 Your Skin Type", SKIN_TYPES, 
+                                     index=st.session_state.user_input.get("skin_idx", 0))
+            face_shape = st.selectbox("✨ Your Face Shape", FACE_SHAPES,
+                                      index=st.session_state.user_input.get("face_idx", 0))
+            undertone = st.selectbox("🎨 Your Skin Undertone", UNDERTONES,
+                                     index=st.session_state.user_input.get("tone_idx", 0))
+        
+        with col2:
+            occasion = st.selectbox("💒 Occasion", OCCASIONS,
+                                   index=st.session_state.user_input.get("occ_idx", 0))
+            level = st.selectbox("📖 Experience Level", LEVELS,
+                                index=st.session_state.user_input.get("level_idx", 0))
+            product_tier = st.radio(
+                "🛍️ Budget (Philippines)",
+                ["Budget (₱150–₱600)", "Mid-Range (₱300–₱1,200)", "Premium (₱1,000+)"],
+                index=st.session_state.user_input.get("tier_idx", 0),
+                horizontal=True
+            )
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Save selections
+        st.session_state.user_input = {
+            "skin_idx": SKIN_TYPES.index(skin_type),
+            "face_idx": FACE_SHAPES.index(face_shape),
+            "tone_idx": UNDERTONES.index(undertone),
+            "occ_idx": OCCASIONS.index(occasion),
+            "level_idx": LEVELS.index(level),
+            "tier_idx": ["Budget (₱150–₱600)", "Mid-Range (₱300–₱1,200)", "Premium (₱1,000+)"].index(product_tier),
+        }
+        
+        tutorial = generate_tutorial(skin_type, face_shape, undertone, occasion, level)
+        
+        st.markdown(f"""
+        <div class='success-banner'>
+            ✨ Your {tutorial['occasion'].upper()} Tutorial is Ready!<br>
+            <small>{tutorial['skin_type'].title()} skin • {tutorial['face_shape']} face • {tutorial['undertone'].split()[0]} undertone • {tutorial['level']} level</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "🧴 Base", "👁️ Eyes", "💋 Lips", "🎨 Contour", "🎨 Undertone"
+        ])
+        
+        with tab1:
+            st.markdown("<p class='section-header'>Base & Complexion</p>", unsafe_allow_html=True)
+            st.caption(f"Optimized for {tutorial['skin_type']} skin")
+            for step in tutorial["base"]:
+                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
+        
+        with tab2:
+            st.markdown("<p class='section-header'>Eye Makeup</p>", unsafe_allow_html=True)
+            st.caption(f"Skill Level: {tutorial['level']}")
+            for step in tutorial["eyes"]:
+                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
+        
+        with tab3:
+            st.markdown("<p class='section-header'>Lip Look</p>", unsafe_allow_html=True)
+            st.caption(f"Perfect for {tutorial['occasion']}")
+            for step in tutorial["lips"]:
+                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
+        
+        with tab4:
+            st.markdown("<p class='section-header'>Contour & Bronzing</p>", unsafe_allow_html=True)
+            st.caption(f"Face Shape: {tutorial['face_shape']}")
+            for line in tutorial["contour"]:
+                st.markdown(line)
+        
+        with tab5:
+            st.markdown("<p class='section-header'>Undertone Shade Guide</p>", unsafe_allow_html=True)
+            st.caption(f"Your undertone: {tutorial['undertone']}")
+            st.info(tutorial["undertone_guide"])
+        
+        st.markdown("<div class='tip-box'>", unsafe_allow_html=True)
+        st.markdown(f"**💡 Daily Pro Tip:** {tutorial['tip']}")
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        st.divider()
+        st.markdown("💡 **Next:** Click **📖 Make-up Catalog** above to browse recommended products that match your routine!")
+
+# ==================================================
+# VIEW 2: CATALOG — With Real Product Photos
+# ==================================================
+else:
     st.markdown("<h2 class='section-header' style='border:none; padding-left:0; text-align:center;'>📖 Make-up Catalog — 22 Curated Items</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#d4c4d8;'>Handpicked products available in the Philippines 🇵🇭</p>", unsafe_allow_html=True)
     
-    # Filter options
     cat_filter = st.selectbox("Filter by Category:", ["All"] + sorted(list({item["category"] for item in TUTORIALS["catalog"]})))
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Display catalog in responsive grid
     filtered = TUTORIALS["catalog"] if cat_filter == "All" else [i for i in TUTORIALS["catalog"] if i["category"] == cat_filter]
     
     st.markdown("<div class='catalog-grid'>", unsafe_allow_html=True)
     for item in filtered:
         st.markdown(f"""
         <div class='catalog-card'>
-            <div class='card-image-container'>{item['emoji']}</div>
+            <div class='card-image-container'>
+                <img src='{item["image_url"]}' alt='{item["name"]}' loading='lazy'>
+            </div>
             <div class='card-content'>
                 <span style='font-size:0.8rem; color:#a890a0;'>{item['category']}</span>
                 <div class='product-name'>{item['name']}</div>
@@ -705,86 +836,9 @@ if catalog_clicked:
         <strong>🛍️ Where to Buy:</strong> Lazada • Shopee • Watsons • The SM Store • Sephora.ph • BeautyMNL • Rustan's
     </div>
     """, unsafe_allow_html=True)
-
-# ---------- TUTORIAL FORM & VIEW ----------
-else:
-    with st.container():
-        st.markdown("<div class='form-card'>", unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            skin_type = st.selectbox("🧴 Your Skin Type", SKIN_TYPES)
-            face_shape = st.selectbox("✨ Your Face Shape", FACE_SHAPES)
-            undertone = st.selectbox("🎨 Your Skin Undertone", UNDERTONES)
-        
-        with col2:
-            occasion = st.selectbox("💒 Occasion", OCCASIONS)
-            level = st.selectbox("📖 Experience Level", LEVELS)
-            product_tier = st.radio(
-                "🛍️ Budget (Philippines)",
-                ["Budget (₱150–₱600)", "Mid-Range (₱300–₱1,200)", "Premium (₱1,000+)"],
-                index=0,
-                horizontal=True
-            )
-        
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    if generate_clicked:
-        lip_key = get_lip_key(occasion)
-        
-        base_steps = TUTORIALS["base"][skin_type]
-        eye_steps = TUTORIALS["eyes"][level]
-        lip_steps = TUTORIALS["lips"][lip_key]
-        contour_steps = TUTORIALS["contour_bronze"][face_shape]
-        undertone_guide = TUTORIALS["undertone_guide"][undertone]
-        tip = random.choice(TUTORIALS["pro_tips"])
-
-        st.markdown(f"""
-        <div class='success-banner'>
-            ✨ Your {occasion.upper()} Tutorial is Ready!<br>
-            <small>{skin_type.title()} skin • {face_shape} face • {undertone.split()[0]} undertone • {level} level</small>
-        </div>
-        """, unsafe_allow_html=True)
-
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "🧴 Base", "👁️ Eyes", "💋 Lips", "🎨 Contour", "🎨 Undertone"
-        ])
-
-        with tab1:
-            st.markdown("<p class='section-header'>Base & Complexion</p>", unsafe_allow_html=True)
-            st.caption(f"Optimized for {skin_type} skin")
-            for step in base_steps:
-                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
-
-        with tab2:
-            st.markdown("<p class='section-header'>Eye Makeup</p>", unsafe_allow_html=True)
-            st.caption(f"Skill Level: {level}")
-            for step in eye_steps:
-                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
-
-        with tab3:
-            st.markdown("<p class='section-header'>Lip Look</p>", unsafe_allow_html=True)
-            st.caption(f"Perfect for {occasion}")
-            for step in lip_steps:
-                st.markdown(f"<div class='step-card'>{step}</div>", unsafe_allow_html=True)
-
-        with tab4:
-            st.markdown("<p class='section-header'>Contour & Bronzing</p>", unsafe_allow_html=True)
-            st.caption(f"Face Shape: {face_shape}")
-            for line in contour_steps:
-                st.markdown(line)
-
-        with tab5:
-            st.markdown("<p class='section-header'>Undertone Shade Guide</p>", unsafe_allow_html=True)
-            st.caption(f"Your undertone: {undertone}")
-            st.info(undertone_guide)
-
-        st.markdown("<div class='tip-box'>", unsafe_allow_html=True)
-        st.markdown(f"**💡 Daily Pro Tip:** {tip}")
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.divider()
-        st.markdown("💡 **Tip:** Check the **📖 Make-up Catalog** button above to browse all recommended products!")
+    
+    st.markdown("<hr style='margin-top:2rem; opacity:0.2;'>", unsafe_allow_html=True)
+    st.markdown("<p class='back-note'>✨ Ready for your custom routine? Click <strong>✨ Generate My Tutorial</strong> above & I'll craft one just for you!</p>", unsafe_allow_html=True)
 
 # ---------- FOOTER ----------
 st.markdown("""
