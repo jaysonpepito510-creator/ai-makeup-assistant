@@ -2,7 +2,7 @@ import streamlit as st
 import time
 
 # ----------------------
-# AI Makeup Assistant — Chat Bubbles + Skeleton Loading
+# AI Makeup Assistant
 # ----------------------
 st.set_page_config(
     page_title="💄 AI Makeup Assistant",
@@ -18,7 +18,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # ----------------------
-# Custom CSS — Chat Bubbles + Skeleton
+# Custom CSS
 # ----------------------
 st.markdown("""
 <style>
@@ -50,7 +50,6 @@ st.markdown("""
         backdrop-filter: blur(12px);
         margin-bottom: 2rem;
     }
-    /* Chat Bubbles */
     .user-bubble {
         background: linear-gradient(90deg, #ff5e8c 0%, #ff8fab 100%);
         color: white;
@@ -69,7 +68,6 @@ st.markdown("""
         margin-right: auto;
         max-width: 90%;
     }
-    /* Tutorial Cards inside Bubble */
     .tutorial-card {
         background: rgba(255, 255, 255, 0.05);
         border-radius: 12px;
@@ -95,7 +93,6 @@ st.markdown("""
         margin-bottom: 1rem;
         border: 1px solid rgba(255, 140, 180, 0.25);
     }
-    /* Skeleton Loading */
     .skeleton-line {
         background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 75%);
         background-size: 200% 100%;
@@ -247,7 +244,7 @@ TUTORIALS = {
 }
 
 # ----------------------
-# Helper Functions
+# Helper Function
 # ----------------------
 def get_tutorial(skin_type, occasion, level, undertone):
     base = TUTORIALS["base"][skin_type]
@@ -265,7 +262,6 @@ st.markdown("<p class='subtitle'>Your personalized makeup guide — step by step
 # --- Input Form ---
 with st.container():
     st.markdown("<div class='form-card'>", unsafe_allow_html=True)
-    
     col1, col2 = st.columns(2)
     with col1:
         skin_type = st.selectbox("🧴 Skin Type", SKIN_TYPES)
@@ -273,22 +269,16 @@ with st.container():
     with col2:
         occasion = st.selectbox("📅 Occasion", OCCASIONS)
         level = st.selectbox("🎓 Skill Level", LEVELS)
-    
     undertone = st.selectbox("🎨 Skin Undertone", UNDERTONES)
-    
     generate_btn = st.button("✨ Generate My Tutorial")
-    
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- Process Button Click ---
+# --- Generate Tutorial ---
 if generate_btn:
-    # Build user selection message
     user_msg = f"**Selection:** {skin_type} skin • {occasion} • {level} • {face_shape} • {undertone}"
-    
-    # Display user bubble immediately
     st.markdown(f"<div class='user-bubble'>{user_msg}</div>", unsafe_allow_html=True)
-    
-    # Skeleton loading placeholder
+
+    # Skeleton loading
     skeleton_placeholder = st.empty()
     skeleton_html = """
     <div class='assistant-bubble'>
@@ -303,21 +293,18 @@ if generate_btn:
     </div>
     """
     skeleton_placeholder.markdown(skeleton_html, unsafe_allow_html=True)
-    
-    # ⏱️ Loading delay — shows skeleton clearly
     time.sleep(2.5)
-    
+
     # Get tutorial data
     base_steps, eye_steps, lip_steps, undertone_tip = get_tutorial(skin_type, occasion, level, undertone)
-    
-    # Build final result
+
+    # Build tutorial HTML
     result_html = f"""
     <div class='assistant-bubble'>
         <div class='result-header'>
             ✨ Your Personalized Makeup Tutorial ✨<br>
             <small>{occasion.title()} • {level} • {skin_type} skin</small>
         </div>
-        
         <h4 style='color:#ffd6e8; margin:0.5rem 0;'>🧴 Base & Skin Prep</h4>
     """
     for step in base_steps:
@@ -327,7 +314,6 @@ if generate_btn:
             <span class='step-text'>{step['text']}</span>
         </div>
         """
-    
     result_html += "<h4 style='color:#ffd6e8; margin:1rem 0 0.5rem;'>👁️ Eye Makeup</h4>"
     for step in eye_steps:
         result_html += f"""
@@ -336,7 +322,6 @@ if generate_btn:
             <span class='step-text'>{step['text']}</span>
         </div>
         """
-    
     result_html += "<h4 style='color:#ffd6e8; margin:1rem 0 0.5rem;'>💋 Lip Color</h4>"
     for step in lip_steps:
         result_html += f"""
@@ -345,24 +330,23 @@ if generate_btn:
             <span class='step-text'>{step['text']}</span>
         </div>
         """
-    
     result_html += f"""
         <div class='tip-box'>
             💡 <strong>Color Tip — {undertone.split('(')[0].strip()} Undertone:</strong> {undertone_tip}
         </div>
     </div>
     """
-    
-    # ✅ Render HTML properly
+
+    # ✅ THIS IS THE KEY — unsafe_allow_html=True shows styled cards, NOT raw code
     skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
-    
+
     # Save to history
     st.session_state.messages.append({"role": "user", "content": f"<div class='user-bubble'>{user_msg}</div>"})
     st.session_state.messages.append({"role": "assistant", "content": result_html})
 
-# --- Show past conversations ---
+# --- Show Past Conversations ---
 else:
     if st.session_state.messages:
         for msg in st.session_state.messages:
-            # ✅ Render ALL history messages with HTML enabled
+            # ✅ Also fixed here — history shows styled cards too
             st.markdown(msg["content"], unsafe_allow_html=True)
