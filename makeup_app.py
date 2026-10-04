@@ -1,145 +1,129 @@
 import streamlit as st
 import time
 
+# ----------------------
+# Page Configuration
+# ----------------------
 st.set_page_config(
     page_title="💄 AI Makeup Assistant",
-    page_icon="💄",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
 # ----------------------
-# Custom CSS
+# Custom CSS Styling
 # ----------------------
 st.markdown("""
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    * {box-sizing: border-box;}
-    .stApp {
-        background: linear-gradient(135deg, #1a1025 0%, #2e1a3c 50%, #1f172b 100%);
-        color: #f8e6f0;
-    }
-    h1 {
-        background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 50%, #fbc2eb 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        font-size: clamp(1.6rem, 6vw, 3rem);
-        text-align: center;
-        margin: 0.5rem 0;
-    }
-    .subtitle {
-        text-align: center;
-        color: #e0c8d5;
-        font-size: clamp(0.9rem, 3vw, 1.2rem);
-        margin-bottom: 2rem;
-    }
-    .form-card {
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 20px;
-        padding: clamp(1.5rem, 5vw, 2rem);
-        border: 1px solid rgba(255, 200, 220, 0.15);
-        backdrop-filter: blur(12px);
-        margin-bottom: 2rem;
-    }
-    .user-bubble {
-        background: linear-gradient(90deg, #ff5e8c 0%, #ff8fab 100%);
-        color: white;
-        border-radius: 18px 18px 4px 18px;
-        padding: 0.9rem 1.2rem;
-        margin: 0.8rem 0;
-        margin-left: auto;
-        max-width: 80%;
-    }
-    .assistant-bubble {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 140, 180, 0.2);
-        border-radius: 18px 18px 18px 4px;
-        padding: 1.2rem 1.5rem;
-        margin: 0.8rem 0;
-        margin-right: auto;
-        max-width: 90%;
-    }
-    .tutorial-card {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        padding: 1rem 1.2rem;
-        margin: 0.6rem 0;
-        border-left: 3px solid #ff8fab;
-        line-height: 1.7;
-    }
-    .step-title {
-        font-weight: 700;
-        color: #ffb3c1;
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-    .step-text {
-        color: #e4d4dc;
-    }
-    .result-header {
-        text-align: center;
-        background: rgba(255, 140, 180, 0.15);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(255, 140, 180, 0.25);
-    }
-    .skeleton-line {
-        background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-        border-radius: 6px;
-        height: 16px;
-        margin: 0.6rem 0;
-    }
-    @keyframes skeleton-loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    div.stButton > button:first-child {
-        background: linear-gradient(90deg, #ff5e8c 0%, #ff8fab 100%);
-        color: white !important;
-        font-weight: 700;
-        border-radius: 12px;
-        padding: 0.8rem 2rem;
-        border: none;
-        width: 100%;
-        font-size: 1rem;
-        margin-top: 1rem;
-        cursor: pointer;
-    }
-    div.stButton > button:first-child:hover {
-        opacity: 0.95;
-        transform: scale(1.01);
-        transition: all 0.2s ease;
-    }
-    .tip-box {
-        background: rgba(255, 200, 100, 0.12);
-        border-radius: 12px;
-        padding: 1rem 1.2rem;
-        border: 1px solid rgba(255, 200, 100, 0.3);
-        margin-top: 1rem;
-    }
+* { font-family: 'Plus Jakarta Sans', sans-serif; }
+.stApp {
+    background: linear-gradient(135deg, #1a1025 0%, #2e1a3c 50%, #1f172b 100%);
+    color: #f8e6f0;
+}
+.gradient-title {
+    background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 50%, #fbc2eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    font-size: 2.5rem;
+}
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 200, 220, 0.15);
+    padding: 2rem;
+    backdrop-filter: blur(14px);
+    margin-bottom: 1.5rem;
+}
+.tutorial-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    border-left: 4px solid #ff8fab;
+    padding: 1rem 1.25rem;
+    margin: 0.75rem 0;
+    transition: all 0.25s ease;
+}
+.tutorial-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+.step-title {
+    font-weight: 700;
+    color: #ffb3c1;
+    font-size: 1rem;
+}
+.step-text {
+    color: #f8e6f0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+.section-header {
+    color: #ffc8dd;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255, 183, 197, 0.2);
+    padding-bottom: 0.5rem;
+    margin: 1.5rem 0 1rem;
+}
+.banner-amber {
+    background: rgba(255, 209, 102, 0.1);
+    border: 1px solid rgba(255, 209, 102, 0.3);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+}
+.banner-purple {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+}
+.product-chip {
+    background: rgba(255, 94, 140, 0.1);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem;
+    display: inline-block;
+}
+div.stButton > button:first-child {
+    background: linear-gradient(90deg, #ff5e8c 0%, #ff8fab 100%);
+    border: none;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(255, 94, 140, 0.4);
+    width: 100%;
+}
+div.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(255, 94, 140, 0.6);
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------
 # Tutorial Data
 # ----------------------
-SKIN_TYPES = ["oily", "dry", "combination", "normal", "sensitive"]
-OCCASIONS = ["everyday", "work", "party", "date", "wedding/bridal", "graduation"]
-LEVELS = ["beginner", "intermediate", "advanced"]
-FACE_SHAPES = ["oval", "round", "square", "heart", "long", "diamond"]
-UNDERTONES = ["warm (yellow/golden)", "cool (pink/red)", "neutral (balanced)"]
-
 TUTORIALS = {
     "undertone_guide": {
         "warm (yellow/golden)": "Go for golden, peach, coral, warm reds, and amber shades — avoid icy tones.",
         "cool (pink/red)": "Choose rose, berry, plum, cherry red, and pink-based nudes — avoid orange tones.",
         "neutral (balanced)": "You can pull off almost any shade! From soft nudes to bold reds — experiment freely ✨"
+    },
+    "face_shape_guide": {
+        "oval": "Apply contour lightly under cheekbones. Highlight forehead center and chin for balanced radiance.",
+        "round": "Contour along sides of jawline and temples to add soft definition and structure.",
+        "square": "Soften angles by applying contour to corners of forehead and jawline. Keep blush rounded on apples.",
+        "heart": "Contour the sides of forehead and point of chin. Highlight cheekbones to enhance heart shape.",
+        "long": "Sweep bronzer horizontally across cheekbones and top of forehead to balance length softly.",
+        "diamond": "Contour lower cheekbones to soften angular high cheeks; highlight chin and center of forehead."
     },
     "base": {
         "oily": [
@@ -234,103 +218,130 @@ TUTORIALS = {
             {"title": "Color", "text": "Rosewood, dusty rose, or warm berry — shades that photo beautifully."},
             {"title": "Finish", "text": "Blot well. Keep lipstick in bag for touch-ups between photos."}
         ]
+    },
+    "products": {
+        "oily": ["Niacinamide Matte Primer", "Oil-Free Liquid Foundation", "Translucent Loose Setting Powder"],
+        "dry": ["Hyaluronic Hydrating Primer", "Dewy Satin Cream Foundation", "Nourishing Peptide Lip Oil"],
+        "combination": ["Dual-Action Balance Primer", "Medium Satin Finish Cushion", "Hydrating Tinted Balm"],
+        "normal": ["Radiance SPF Glow Primer", "Sheer Tinted Skin Hydrator", "Velvet Cream Blush"],
+        "sensitive": ["Calming Centella Mineral Primer", "Hypoallergenic Serum Foundation", "Soothing Peptide Lip Treatment"]
     }
 }
-
-def get_tutorial(skin_type, occasion, level, undertone):
-    base = TUTORIALS["base"][skin_type]
-    eyes = TUTORIALS["eyes"][level]
-    lips = TUTORIALS["lips"][occasion]
-    undertone_tip = TUTORIALS["undertone_guide"][undertone]
-    return base, eyes, lips, undertone_tip
 
 # ----------------------
 # Main UI
 # ----------------------
-st.markdown("<h1>💄 AI Makeup Assistant</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Your personalized makeup guide — step by step ✨</p>", unsafe_allow_html=True)
+st.markdown('<h1 class="gradient-title" style="text-align:center;">💄 AI Makeup Assistant</h1>', unsafe_allow_html=True)
+st.markdown('<p style="text-align:center; color:#ffc8dd; opacity:0.8;">Your personalized makeup studio guide — step by step ✨</p>', unsafe_allow_html=True)
 
-with st.container():
-    st.markdown("<div class='form-card'>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        skin_type = st.selectbox("🧴 Skin Type", SKIN_TYPES)
-        face_shape = st.selectbox("✨ Face Shape", FACE_SHAPES)
-    with col2:
-        occasion = st.selectbox("📅 Occasion", OCCASIONS)
-        level = st.selectbox("🎓 Skill Level", LEVELS)
-    undertone = st.selectbox("🎨 Skin Undertone", UNDERTONES)
-    generate_btn = st.button("✨ Generate My Tutorial")
-    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("---")
 
-if generate_btn:
-    user_msg = f"**Selection:** {skin_type} skin • {occasion} • {level} • {face_shape} • {undertone}"
-    st.markdown(f"<div class='user-bubble'>{user_msg}</div>", unsafe_allow_html=True)
+# Input Form
+col1, col2, col3 = st.columns(3)
+with col1:
+    skin_type = st.selectbox("🧴 Skin Type", list(TUTORIALS["base"].keys()))
+with col2:
+    occasion = st.selectbox("📅 Occasion", list(TUTORIALS["lips"].keys()))
+with col3:
+    level = st.selectbox("🎓 Skill Level", list(TUTORIALS["eyes"].keys()))
 
-    skeleton_placeholder = st.empty()
-    skeleton_html = """
-    <div class='assistant-bubble'>
-        <div style='width: 60%;' class='skeleton-line'></div>
-        <div style='width: 85%;' class='skeleton-line'></div>
-        <div style='width: 90%;' class='skeleton-line'></div>
-        <div style='width: 75%;' class='skeleton-line'></div>
-        <div style='width: 100%; height: 40px;' class='skeleton-line'></div>
-        <div style='width: 65%;' class='skeleton-line'></div>
-        <div style='width: 80%;' class='skeleton-line'></div>
-        <div style='width: 95%;' class='skeleton-line'></div>
+col4, col5 = st.columns(2)
+with col4:
+    face_shape = st.selectbox("✨ Face Shape", list(TUTORIALS["face_shape_guide"].keys()))
+with col5:
+    undertone = st.selectbox("🎨 Skin Undertone", list(TUTORIALS["undertone_guide"].keys()))
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Generate Button
+if st.button("✨ Generate My AI Tutorial", type="primary"):
+    with st.spinner("Curating your personalized makeup routine..."):
+        time.sleep(1.8)  # Simulate loading animation
+        
+    # Selection Summary
+    st.markdown(f"""
+    <div class="glass-card">
+        <strong>Selection:</strong> {skin_type} skin • {occasion} • {level} • {face_shape} face • {undertone} undertone
     </div>
-    """
-    skeleton_placeholder.markdown(skeleton_html, unsafe_allow_html=True)
-    time.sleep(2.5)
-
-    base_steps, eye_steps, lip_steps, undertone_tip = get_tutorial(skin_type, occasion, level, undertone)
-
-    result_html = f"""
-    <div class='assistant-bubble'>
-        <div class='result-header'>
-            ✨ Your Personalized Makeup Tutorial ✨<br>
-            <small>{occasion.title()} • {level} • {skin_type} skin</small>
-        </div>
-        <h4 style='color:#ffd6e8; margin:0.5rem 0;'>🧴 Base & Skin Prep</h4>
-    """
-    for step in base_steps:
-        result_html += f"""
-        <div class='tutorial-card'>
-            <span class='step-title'>{step['title']}</span>
-            <span class='step-text'>{step['text']}</span>
-        </div>
-        """
-    result_html += "<h4 style='color:#ffd6e8; margin:1rem 0 0.5rem;'>👁️ Eye Makeup</h4>"
-    for step in eye_steps:
-        result_html += f"""
-        <div class='tutorial-card'>
-            <span class='step-title'>{step['title']}</span>
-            <span class='step-text'>{step['text']}</span>
-        </div>
-        """
-    result_html += "<h4 style='color:#ffd6e8; margin:1rem 0 0.5rem;'>💋 Lip Color</h4>"
-    for step in lip_steps:
-        result_html += f"""
-        <div class='tutorial-card'>
-            <span class='step-title'>{step['title']}</span>
-            <span class='step-text'>{step['text']}</span>
-        </div>
-        """
-    result_html += f"""
-        <div class='tip-box'>
-            💡 <strong>Color Tip — {undertone.split('(')[0].strip()} Undertone:</strong> {undertone_tip}
-        </div>
+    """, unsafe_allow_html=True)
+    
+    # Undertone Banner
+    undertone_text = TUTORIALS["undertone_guide"][undertone]
+    st.markdown(f"""
+    <div class="banner-amber">
+        <strong style="color:#ffd166;">🎨 Color Tip — {undertone.split('(')[0].strip().upper()} Undertone</strong><br>
+        {undertone_text}
     </div>
-    """
+    """, unsafe_allow_html=True)
+    
+    # Face Shape Banner
+    face_text = TUTORIALS["face_shape_guide"][face_shape]
+    st.markdown(f"""
+    <div class="banner-purple">
+        <strong style="color:#a78bfa;">📐 Contour Tip — {face_shape.upper()} Face</strong><br>
+        {face_text}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Base & Skin Prep
+    st.markdown('<p class="section-header">🧴 Base & Skin Prep</p>', unsafe_allow_html=True)
+    for step in TUTORIALS["base"][skin_type]:
+        st.markdown(f"""
+        <div class="tutorial-card">
+            <span class="step-title">{step['title']}</span>
+            <span class="step-text">{step['text']}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Eye Makeup
+    st.markdown('<p class="section-header">👁️ Eye Makeup</p>', unsafe_allow_html=True)
+    for step in TUTORIALS["eyes"][level]:
+        st.markdown(f"""
+        <div class="tutorial-card">
+            <span class="step-title">{step['title']}</span>
+            <span class="step-text">{step['text']}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Lip Color
+    st.markdown('<p class="section-header">💋 Lip Color</p>', unsafe_allow_html=True)
+    for step in TUTORIALS["lips"][occasion]:
+        st.markdown(f"""
+        <div class="tutorial-card">
+            <span class="step-title">{step['title']}</span>
+            <span class="step-text">{step['text']}</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Product Recommendations
+    st.markdown('<p class="section-header">🛍️ Recommended Products</p>', unsafe_allow_html=True)
+    products = TUTORIALS["products"][skin_type]
+    prod_cols = st.columns(len(products))
+    for i, prod in enumerate(products):
+        with prod_cols[i]:
+            st.markdown(f"""
+            <div class="product-chip" style="text-align:center;">
+                <i class="fa-solid fa-sparkles" style="color:#ff8fab;"></i> {prod}
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Export text area
+    st.markdown("<br>", unsafe_allow_html=True)
+    export_text = f"""💄 MY AI MAKEUP ROUTINE
+Selection: {skin_type} skin • {occasion} • {level} • {face_shape} face • {undertone}
 
-    # ✅ THIS IS THE KEY — unsafe_allow_html=True MUST BE HERE
-    skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
+🎨 Undertone Tip: {undertone_text}
+📐 Contour Tip: {face_text}
 
-    st.session_state.messages.append({"role": "user", "content": f"<div class='user-bubble'>{user_msg}</div>"})
-    st.session_state.messages.append({"role": "assistant", "content": result_html})
-
-else:
-    if st.session_state.messages:
-        for msg in st.session_state.messages:
-            # ✅ Also required here for history to render properly
-            st.markdown(msg["content"], unsafe_allow_html=True)
+--- 🧴 BASE & SKIN PREP ---
+"""
+    for s in TUTORIALS["base"][skin_type]:
+        export_text += f"• {s['title']}: {s['text']}\n"
+    export_text += "\n--- 👁️ EYE MAKEUP ---\n"
+    for s in TUTORIALS["eyes"][level]:
+        export_text += f"• {s['title']}: {s['text']}\n"
+    export_text += "\n--- 💋 LIP COLOR ---\n"
+    for s in TUTORIALS["lips"][occasion]:
+        export_text += f"• {s['title']}: {s['text']}\n"
+    
+    st.text_area("📋 Your Routine (Copy & Save)", export_text, height=250)
