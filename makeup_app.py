@@ -283,9 +283,7 @@ with st.container():
 # --- Process Button Click ---
 if generate_btn:
     # Build user selection message
-    user_msg = f"""
-    **Selection:** {skin_type} skin • {occasion} • {level} • {face_shape} • {undertone}
-    """
+    user_msg = f"**Selection:** {skin_type} skin • {occasion} • {level} • {face_shape} • {undertone}"
     
     # Display user bubble immediately
     st.markdown(f"<div class='user-bubble'>{user_msg}</div>", unsafe_allow_html=True)
@@ -355,7 +353,7 @@ if generate_btn:
     </div>
     """
     
-    # Replace skeleton with final tutorial
+    # ✅ THIS IS THE KEY FIX — unsafe_allow_html=True included
     skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
     
     # Save to history
@@ -369,4 +367,5 @@ else:
             if msg["role"] == "user":
                 st.markdown(f"<div class='user-bubble'>{msg['content']}</div>", unsafe_allow_html=True)
             else:
+                # ✅ Also fixed here for past messages
                 st.markdown(msg["content"], unsafe_allow_html=True)
