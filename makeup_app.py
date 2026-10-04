@@ -305,6 +305,30 @@ if generate_btn:
     </div>
     """
     skeleton_placeholder.markdown(skeleton_html, unsafe_allow_html=True)
+
+    # ⏱️ PASTE THE SLEEP LINE RIGHT HERE — BETWEEN SKELETON AND GET_TUTORIAL
+    time.sleep(2)  # ← RIGHT HERE ✅
+
+    # Get tutorial data
+    base_steps, eye_steps, lip_steps, undertone_tip = get_tutorial(skin_type, occasion, level)
+    
+    # ... rest of the code that builds the result
+    
+    # Skeleton loading placeholder
+    skeleton_placeholder = st.empty()
+    skeleton_html = """
+    <div class='assistant-bubble'>
+        <div style='width: 60%;' class='skeleton-line'></div>
+        <div style='width: 85%;' class='skeleton-line'></div>
+        <div style='width: 90%;' class='skeleton-line'></div>
+        <div style='width: 75%;' class='skeleton-line'></div>
+        <div style='width: 100%; height: 40px;' class='skeleton-line'></div>
+        <div style='width: 65%;' class='skeleton-line'></div>
+        <div style='width: 80%;' class='skeleton-line'></div>
+        <div style='width: 95%;' class='skeleton-line'></div>
+    </div>
+    """
+    skeleton_placeholder.markdown(skeleton_html, unsafe_allow_html=True)
     
     # Simulate processing
     time.sleep(2)
