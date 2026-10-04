@@ -353,19 +353,16 @@ if generate_btn:
     </div>
     """
     
-    # ✅ THIS IS THE KEY FIX — unsafe_allow_html=True included
+    # ✅ Render HTML properly
     skeleton_placeholder.markdown(result_html, unsafe_allow_html=True)
     
     # Save to history
-    st.session_state.messages.append({"role": "user", "content": user_msg})
+    st.session_state.messages.append({"role": "user", "content": f"<div class='user-bubble'>{user_msg}</div>"})
     st.session_state.messages.append({"role": "assistant", "content": result_html})
 
 # --- Show past conversations ---
 else:
     if st.session_state.messages:
         for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.markdown(f"<div class='user-bubble'>{msg['content']}</div>", unsafe_allow_html=True)
-            else:
-                # ✅ Also fixed here for past messages
-                st.markdown(msg["content"], unsafe_allow_html=True)
+            # ✅ Render ALL history messages with HTML enabled
+            st.markdown(msg["content"], unsafe_allow_html=True)
